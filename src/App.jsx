@@ -40,7 +40,7 @@ function App() {
   return (
     <div className="app-container">
       <Sidebar config={config} setConfig={setConfig} elements={elements} setElements={setElements} />
-      <CanvasPreview config={config} elements={elements} setElements={setElements} />
+      <CanvasPreview config={config} setConfig={setConfig} elements={elements} setElements={setElements} />
     </div>
   );
 }

@@ -1,11 +1,51 @@
 import React, { useRef, useState } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, AlignCenterVertical, AlignCenterHorizontal } from 'lucide-react';
+import { Download, AlignCenterVertical, AlignCenterHorizontal, Star } from 'lucide-react';
 import { Rnd } from 'react-rnd';
 
-export default function CanvasPreview({ config, elements, setElements }) {
+export default function CanvasPreview({ config, setConfig, elements, setElements }) {
     const screenshotRef = useRef(null);
     const [guideLines, setGuideLines] = useState({ v: false, h: false });
+
+    // Ensure gradient background
+    const bgStyle = {
+        background: `linear-gradient(145deg, ${config.backgroundColor || '#0a0a0a'} 0%, ${config.backgroundColor2 || '#1a1a1a'} 100%)`
+    };
+
+    const deviceSpecs = {
+        'iphone-65': {
+            canvasW: 428,
+            canvasH: 926,
+            aspect: '1284 / 2778',
+            radiusCenter: '44px',
+            radiusEdge: '44px 44px 0 0',
+            border: '14px',
+            island: true,
+            classic: false
+        },
+        'iphone-55': {
+            canvasW: 414,
+            canvasH: 736,
+            aspect: '1242 / 2208',
+            radiusCenter: '40px',
+            radiusEdge: '40px 40px 0 0',
+            border: '12px',
+            island: false,
+            classic: true
+        },
+        'ipad-pro': {
+            canvasW: 512,
+            canvasH: 683,
+            aspect: '2048 / 2732',
+            radiusCenter: '18px',
+            radiusEdge: '18px 18px 0 0',
+            border: '12px',
+            island: false,
+            classic: false
+        }
+    };
+
+    const activeSpec = deviceSpecs[config.deviceType] || deviceSpecs['iphone-65'];
 
     const handleExport = async () => {
         console.log("Export button clicked! screenshotRef.current is:", screenshotRef.current);
@@ -17,7 +57,6 @@ export default function CanvasPreview({ config, elements, setElements }) {
             console.log("Starting export process...");
             // Small timeout to ensure DOM is fully ready
             await new Promise(r => setTimeout(r, 100));
-            console.log("Calculated dimensions. DOM Node width:", screenshotRef.current.offsetWidth);
 
             // Calculate the dimensions & scale factor depending on deviceType
             // Default to iPhone 6.5" max
@@ -32,14 +71,17 @@ export default function CanvasPreview({ config, elements, setElements }) {
                 targetHeight = 2208;
             }
 
-            // The actual node width in DOM, usually 400px (iphone) or scaled (ipad)
-            const scale = targetWidth / screenshotRef.current.offsetWidth;
-            console.log("Scale calculated:", scale);
+            // Force scaling factor using mathematical integers rather than DOM dimensions
+            // to avoid subpixel layout shifts or rounding rounding fractional dimensions
+            const scale = targetWidth / activeSpec.canvasW;
+            console.log("Scale calculated:", scale, "Dimensions:", targetWidth, targetHeight);
 
             console.log("Calling toPng...");
             const dataUrl = await toPng(screenshotRef.current, {
                 quality: 1,
                 pixelRatio: scale,
+                width: activeSpec.canvasW,
+                height: activeSpec.canvasH,
                 cacheBust: true,
                 skipAutoScale: true,
             });
@@ -54,23 +96,6 @@ export default function CanvasPreview({ config, elements, setElements }) {
             console.error('Failed to export screenshot', err);
         }
     };
-
-    // Ensure gradient background
-    const bgStyle = {
-        background: `linear-gradient(145deg, ${config.backgroundColor || '#0a0a0a'} 0%, ${config.backgroundColor2 || '#1a1a1a'} 100%)`
-    };
-
-    // Set base preview dimensions proportionally 
-    let previewWidth = '400px';
-    let previewHeight = '865px'; // ~ iPhone 19.5:9
-
-    if (config.deviceType === 'ipad-pro') {
-        previewWidth = '600px';
-        previewHeight = '800px'; // 4:3 iPad Ratio
-    } else if (config.deviceType === 'iphone-55') {
-        previewWidth = '400px';
-        previewHeight = '711px'; // 16:9 classic iPhone
-    }
 
     return (
         <main className="canvas-area">
@@ -88,9 +113,11 @@ export default function CanvasPreview({ config, elements, setElements }) {
                     ref={screenshotRef}
                     style={{
                         ...bgStyle,
-                        width: previewWidth,
-                        height: previewHeight,
-                        position: 'relative'
+                        width: `${activeSpec.canvasW}px`,
+                        height: `${activeSpec.canvasH}px`,
+                        position: 'relative',
+                        overflow: 'hidden',
+                        flexShrink: 0
                     }}
                 >
                     {/* Snap Guide Lines */}
@@ -146,53 +173,103 @@ export default function CanvasPreview({ config, elements, setElements }) {
                             >
                                 <div
                                     id={`rnd-${el.id}`}
-                                    style={{
+                                    style={el.type === 'image' ? {
+                                        width: `${el.width || 150}px`,
+                                        height: 'auto',
+                                        cursor: 'grab',
+                                        display: 'flex',
+                                        filter: el.hasShadow !== false ? 'drop-shadow(0 10px 20px rgba(0,0,0,0.15))' : 'none'
+                                    } : {
                                         color: el.color,
                                         fontSize: `${el.fontSize}px`,
                                         fontWeight: el.fontWeight,
                                         fontFamily: config.fontFamily,
                                         letterSpacing: '-0.03em',
-                                        lineHeight: 1.1,
+                                        lineHeight: el.type === 'testimonial' ? 1.4 : 1.1,
                                         whiteSpace: 'pre-wrap',
-                                        padding: isBadge ? '8px 20px' : '0',
-                                        backgroundColor: isBadge ? el.backgroundColor : 'rgba(0,0,0,0)',
-                                        borderRadius: isBadge ? '9999px' : '0',
-                                        boxShadow: isBadge && el.backgroundColor !== 'rgba(0,0,0,0)' && el.backgroundColor !== 'transparent' ? '0 8px 32px rgba(0,0,0,0.2)' : 'none',
-                                        border: isBadge && el.backgroundColor !== 'rgba(0,0,0,0)' && el.backgroundColor !== 'transparent' ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                                        filter: isBadge ? 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' : 'none',
-                                        cursor: 'grab'
+                                        padding: isBadge ? '8px 20px' : (el.type === 'testimonial' ? '16px 24px' : '0'),
+                                        backgroundColor: isBadge || el.type === 'testimonial' ? el.backgroundColor : 'rgba(0,0,0,0)',
+                                        borderRadius: isBadge ? '9999px' : (el.type === 'testimonial' ? '16px' : '0'),
+                                        boxShadow: (isBadge || el.type === 'testimonial') && el.backgroundColor !== 'rgba(0,0,0,0)' && el.backgroundColor !== 'transparent' ? '0 12px 40px rgba(0,0,0,0.1)' : 'none',
+                                        border: (isBadge || el.type === 'testimonial') && el.backgroundColor !== 'rgba(0,0,0,0)' && el.backgroundColor !== 'transparent' ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                                        backdropFilter: el.type === 'testimonial' ? 'blur(16px)' : 'none',
+                                        WebkitBackdropFilter: el.type === 'testimonial' ? 'blur(16px)' : 'none',
+                                        cursor: 'grab',
+                                        maxWidth: el.type === 'testimonial' ? '300px' : 'auto'
                                     }}
                                 >
-                                    {el.text}
+                                    {el.type === 'image' ? (
+                                        el.src ? <img src={el.src} alt="floating graphic" style={{ width: '100%', height: 'auto', pointerEvents: 'none', borderRadius: `${el.borderRadius ?? 12}px` }} /> :
+                                            <div style={{ width: '100%', aspectRatio: '1', backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: `${el.borderRadius ?? 12}px`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '10px' }}>No Image</div>
+                                    ) : el.type === 'testimonial' ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            <div style={{ display: 'flex', gap: '2px' }}>
+                                                {Array.from({ length: 5 }).map((_, i) => (
+                                                    <Star key={i} size={14} fill={i < (el.rating || 5) ? "#FACC15" : "none"} color={i < (el.rating || 5) ? "#FACC15" : "rgba(255,255,255,0.3)"} />
+                                                ))}
+                                            </div>
+                                            <div style={{ fontStyle: 'italic', fontSize: `${el.fontSize}px`, color: el.color }}>"{el.text}"</div>
+                                            {el.author && <div style={{ fontSize: `${el.fontSize * 0.75}px`, opacity: 0.8, fontWeight: 500, color: el.color, marginTop: '4px' }}>— {el.author}</div>}
+                                        </div>
+                                    ) : (
+                                        el.text
+                                    )}
                                 </div>
                             </Rnd>
                         );
                     })}
 
                     <div className="device-mockup" style={{
-                        marginTop: config.layout === 'text-bottom' ? 'auto' : (config.layout === 'center' ? 'auto' : '150px'),
                         width: '100%',
-                        flex: 1,
-                        display: 'flex',
-                        alignItems: config.layout === 'center' ? 'center' : 'flex-end',
-                        justifyContent: 'center',
+                        height: '100%',
                         position: 'absolute',
-                        bottom: 0,
+                        top: 0,
+                        left: 0,
+                        display: 'flex',
+                        alignItems: config.layout === 'center' ? 'center' : (config.layout === 'text-bottom' ? 'flex-start' : 'flex-end'),
+                        justifyContent: 'center',
                         zIndex: 10,
                         pointerEvents: 'none' // allow dragging text over it
                     }}>
                         <div className={`device-frame frame-${config.deviceType}`} style={{
-                            height: config.layout === 'center' ? '80%' : '85%',
-                            width: config.deviceType === 'ipad-pro' ? '92%' : '85%',
-                            borderWidth: config.deviceType === 'ipad-pro' ? '6px' : '4px',
-                            borderRadius: config.deviceType === 'ipad-pro' ? '12px 12px 0 0' : '32px 32px 0 0'
+                            width: config.layout === 'center' ? '70%' : '82%',
+                            height: 'auto',
+                            aspectRatio: activeSpec.aspect,
+                            borderWidth: activeSpec.border,
+                            borderStyle: 'solid',
+                            borderColor: '#111',
+                            borderBottomWidth: config.layout === 'center' ? activeSpec.border : (config.layout === 'text-bottom' ? activeSpec.border : '0'),
+                            borderTopWidth: config.layout === 'text-bottom' ? '0' : activeSpec.border,
+                            borderRadius: config.layout === 'center' ? activeSpec.radiusCenter : (config.layout === 'text-bottom' ? '0 0 ' + activeSpec.radiusCenter.split(' ')[0] + ' ' + activeSpec.radiusCenter.split(' ')[0] : activeSpec.radiusEdge),
+                            boxSizing: 'border-box',
+                            position: 'relative',
+                            pointerEvents: 'auto'
                         }}>
-                            {config.deviceType === 'iphone-65' && <div className="dynamic-island"></div>}
-                            {config.deviceType === 'iphone-55' && <div className="classic-bezel-top"></div>}
+                            {activeSpec.island && <div className="dynamic-island"></div>}
+                            {activeSpec.classic && <div className="classic-bezel-top"></div>}
+                            {config.deviceType === 'ipad-pro' && (
+                                <div style={{
+                                    position: 'absolute', top: config.layout === 'text-bottom' ? 'auto' : '-11px', bottom: config.layout === 'text-bottom' ? '-11px' : 'auto', left: '50%', transform: 'translateX(-50%)',
+                                    width: '6px', height: '6px', backgroundColor: '#1f1f1f', borderRadius: '50%', zIndex: 10,
+                                    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.8)'
+                                }}></div>
+                            )}
                             {config.appImage ? (
-                                <img src={config.appImage} alt="App Content" className="app-screen-image" style={{
-                                    borderRadius: config.deviceType === 'ipad-pro' ? '6px 6px 0 0' : (config.deviceType === 'iphone-65' ? '28px 28px 0 0' : '0')
-                                }} />
+                                <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', borderRadius: 'inherit' }}>
+                                    <Rnd
+                                        bounds="parent"
+                                        position={{ x: config.appImageX || 0, y: config.appImageY || 0 }}
+                                        size={{ width: config.appImageWidth || '100%', height: config.appImageHeight || '100%' }}
+                                        onDragStop={(e, d) => setConfig({ ...config, appImageX: d.x, appImageY: d.y })}
+                                        onResizeStop={(e, direction, ref, delta, position) => {
+                                            setConfig({ ...config, appImageWidth: ref.style.width, appImageHeight: ref.style.height, appImageX: position.x, appImageY: position.y });
+                                        }}
+                                        enableResizing={true}
+                                        style={{ display: 'flex' }}
+                                    >
+                                        <img src={config.appImage} alt="App Content" className="app-screen-image" style={{ width: '100%', height: '100%', objectFit: 'fill', borderRadius: '0', pointerEvents: 'none' }} />
+                                    </Rnd>
+                                </div>
                             ) : (
                                 <div style={{
                                     width: '100%',

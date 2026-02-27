@@ -22,11 +22,17 @@ export default function Sidebar({ config, setConfig, elements, setElements }) {
         const newElement = {
             id: Date.now().toString(),
             type,
-            text: type === 'badge' ? 'New Badge' : 'New Text',
+            text: type === 'testimonial' ? 'Absolutely life-changing app! 5 stars.' : (type === 'badge' ? 'New Badge' : (type === 'heading' ? 'New Text' : '')),
+            author: type === 'testimonial' ? 'John Doe, Reviewer' : undefined,
+            rating: type === 'testimonial' ? 5 : undefined,
             color: type === 'badge' ? '#000000' : '#ffffff',
-            backgroundColor: type === 'badge' ? '#ffffff' : 'rgba(0,0,0,0)',
-            fontSize: type === 'badge' ? 20 : 40,
-            fontWeight: type === 'badge' ? 600 : 700,
+            backgroundColor: type === 'badge' ? '#ffffff' : (type === 'testimonial' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0)'),
+            fontSize: type === 'testimonial' ? 16 : (type === 'badge' ? 20 : 40),
+            fontWeight: type === 'badge' || type === 'testimonial' ? 600 : 700,
+            src: type === 'image' ? '' : undefined, // for custom floating images
+            width: type === 'image' ? 150 : undefined,
+            borderRadius: type === 'image' ? 12 : undefined,
+            hasShadow: type === 'image' ? true : undefined,
             x: 32,
             y: 100,
         };
@@ -56,7 +62,7 @@ export default function Sidebar({ config, setConfig, elements, setElements }) {
                         <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <Type size={14} /> Elements
                         </span>
-                        <div style={{ display: 'flex', gap: '4px' }}>
+                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'flex-end', width: '100%', marginTop: '6px' }}>
                             <button
                                 className="btn-primary"
                                 style={{ padding: '4px 8px', fontSize: '11px', background: 'rgba(255,255,255,0.1)' }}
@@ -72,6 +78,22 @@ export default function Sidebar({ config, setConfig, elements, setElements }) {
                                 title="Add Badge"
                             >
                                 + Badge
+                            </button>
+                            <button
+                                className="btn-primary"
+                                style={{ padding: '4px 8px', fontSize: '11px', background: 'rgba(234, 179, 8, 0.5)' }}
+                                onClick={() => addElement('testimonial')}
+                                title="Add Testimonial"
+                            >
+                                + Review
+                            </button>
+                            <button
+                                className="btn-primary"
+                                style={{ padding: '4px 8px', fontSize: '11px', background: 'rgba(168, 85, 247, 0.5)' }}
+                                onClick={() => addElement('image')}
+                                title="Add Floating Image"
+                            >
+                                + Image
                             </button>
                         </div>
                     </div>
@@ -89,39 +111,141 @@ export default function Sidebar({ config, setConfig, elements, setElements }) {
                                     </button>
                                 </div>
 
-                                <textarea
-                                    value={el.text}
-                                    onChange={(e) => updateElement(el.id, 'text', e.target.value)}
-                                    className="control-input"
-                                    style={{ marginBottom: '8px', fontSize: '12px' }}
-                                    rows={2}
-                                />
-
-                                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                                    <input
-                                        type="color"
-                                        value={el.color}
-                                        onChange={(e) => updateElement(el.id, 'color', e.target.value)}
-                                        className="color-picker"
-                                        title="Text Color"
+                                {/* Element Text/Content */}
+                                {el.type !== 'image' && (
+                                    <textarea
+                                        value={el.text}
+                                        onChange={(e) => updateElement(el.id, 'text', e.target.value)}
+                                        className="control-input"
+                                        style={{ marginBottom: el.type === 'testimonial' ? '4px' : '8px', fontSize: '12px' }}
+                                        rows={2}
+                                        placeholder={el.type === 'testimonial' ? "Quote..." : "Text..."}
                                     />
-                                    {el.type === 'badge' && (
+                                )}
+
+                                {/* Specific Testimonial Controls */}
+                                {el.type === 'testimonial' && (
+                                    <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                                        <input
+                                            type="text"
+                                            value={el.author}
+                                            onChange={(e) => updateElement(el.id, 'author', e.target.value)}
+                                            className="control-input"
+                                            style={{ fontSize: '11px', flex: 2 }}
+                                            placeholder="Author/Source"
+                                        />
+                                        <select
+                                            value={el.rating}
+                                            onChange={(e) => updateElement(el.id, 'rating', parseInt(e.target.value))}
+                                            className="control-input"
+                                            style={{ fontSize: '11px', flex: 1, padding: '4px' }}
+                                        >
+                                            <option value="5">5★</option>
+                                            <option value="4">4★</option>
+                                            <option value="3">3★</option>
+                                            <option value="2">2★</option>
+                                            <option value="1">1★</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                {/* Specific Image Controls */}
+                                {el.type === 'image' && (
+                                    <div style={{ marginBottom: '8px' }}>
+                                        <label style={{
+                                            display: 'block',
+                                            padding: '8px',
+                                            textAlign: 'center',
+                                            border: '1px dashed var(--border-focus)',
+                                            borderRadius: 'var(--radius-sm)',
+                                            cursor: 'pointer',
+                                            backgroundColor: 'rgba(0,0,0,0.2)',
+                                            fontSize: '11px',
+                                            color: el.src ? 'var(--text-primary)' : 'var(--text-secondary)'
+                                        }}>
+                                            {el.src ? 'Image Loaded! (Click to replace)' : 'Click to Upload Custom Asset'}
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => {
+                                                    const file = e.target.files[0];
+                                                    if (file) {
+                                                        const reader = new FileReader();
+                                                        reader.onload = (event) => updateElement(el.id, 'src', event.target.result);
+                                                        reader.readAsDataURL(file);
+                                                    }
+                                                }}
+                                                style={{ display: 'none' }}
+                                            />
+                                        </label>
+                                    </div>
+                                )}
+
+                                {/* Style Controls */}
+                                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                    {el.type !== 'image' && (
+                                        <input
+                                            type="color"
+                                            value={el.color}
+                                            onChange={(e) => updateElement(el.id, 'color', e.target.value)}
+                                            className="color-picker"
+                                            title="Text Color"
+                                        />
+                                    )}
+                                    {(el.type === 'badge' || el.type === 'testimonial') && (
                                         <input
                                             type="color"
                                             value={el.backgroundColor !== 'rgba(0,0,0,0)' ? el.backgroundColor : '#ffffff'}
                                             onChange={(e) => updateElement(el.id, 'backgroundColor', e.target.value)}
                                             className="color-picker"
-                                            title="Badge Background"
+                                            title="Background Color"
                                         />
                                     )}
-                                    <input
-                                        type="number"
-                                        value={el.fontSize}
-                                        onChange={(e) => updateElement(el.id, 'fontSize', parseInt(e.target.value))}
-                                        className="control-input"
-                                        style={{ padding: '4px 8px', flex: '1' }}
-                                        title="Font Size"
-                                    />
+                                    {el.type !== 'image' && (
+                                        <input
+                                            type="number"
+                                            value={el.fontSize}
+                                            onChange={(e) => updateElement(el.id, 'fontSize', parseInt(e.target.value))}
+                                            className="control-input"
+                                            style={{ padding: '4px 8px', flex: '1' }}
+                                            title="Font Size"
+                                        />
+                                    )}
+                                    {el.type === 'image' && (
+                                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '8px', flexWrap: 'wrap' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: '1 1 45%' }}>
+                                                <span style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>Width</span>
+                                                <input
+                                                    type="number"
+                                                    value={el.width}
+                                                    onChange={(e) => updateElement(el.id, 'width', parseInt(e.target.value))}
+                                                    className="control-input"
+                                                    style={{ padding: '4px 8px', flex: '1' }}
+                                                    title="Image Resize Width"
+                                                />
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: '1 1 45%' }}>
+                                                <span style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>Radius</span>
+                                                <input
+                                                    type="number"
+                                                    value={el.borderRadius}
+                                                    onChange={(e) => updateElement(el.id, 'borderRadius', parseInt(e.target.value))}
+                                                    className="control-input"
+                                                    style={{ padding: '4px 8px', flex: '1' }}
+                                                    title="Border Radius"
+                                                />
+                                            </div>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', width: '100%' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={el.hasShadow !== false}
+                                                    onChange={(e) => updateElement(el.id, 'hasShadow', e.target.checked)}
+                                                    style={{ accentColor: 'var(--accent-primary)' }}
+                                                />
+                                                Drop Shadow
+                                            </label>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
