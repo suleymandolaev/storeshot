@@ -48,8 +48,8 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
         },
         'galaxy-a15': {
             canvasW: 360,
-            canvasH: 780,
-            aspect: '1080 / 2340',
+            canvasH: 640,
+            aspect: '1080 / 1920',
             radiusCenter: '36px',
             radiusEdge: '36px 36px 0 0',
             border: '10px',
@@ -85,9 +85,9 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
                 targetWidth = 1242;
                 targetHeight = 2208;
             } else if (config.deviceType === 'galaxy-a15') {
-                // Google Play Store recommended phone screenshot size
+                // Google Play Store recommended phone screenshot size (16:9, compliant with 2:1 max ratio)
                 targetWidth = 1080;
-                targetHeight = 2340;
+                targetHeight = 1920;
             }
 
             // Force scaling factor using mathematical integers rather than DOM dimensions
