@@ -277,7 +277,100 @@ export default function Sidebar({ config, setConfig, elements, setElements }) {
                     </div>
 
                     <div className="control-group">
-                        <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Background Colors</span>
+                        <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Background Presets</span>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                            {[
+                                { name: 'Midnight', c1: '#0f172a', c2: '#1e1b4b' },
+                                { name: 'Ocean', c1: '#0c4a6e', c2: '#164e63' },
+                                { name: 'Sunset', c1: '#7c2d12', c2: '#4c1d95' },
+                                { name: 'Aurora', c1: '#042f2e', c2: '#1e3a5f' },
+                                { name: 'Ember', c1: '#451a03', c2: '#7f1d1d' },
+                                { name: 'Lavender', c1: '#3b0764', c2: '#1e1b4b' },
+                                { name: 'Forest', c1: '#052e16', c2: '#1a2e05' },
+                                { name: 'Coral', c1: '#6b2146', c2: '#2d1b69' },
+                                { name: 'Slate', c1: '#1e293b', c2: '#0f172a' },
+                                { name: 'Neon', c1: '#0a0a0a', c2: '#14532d' },
+                                { name: 'Berry', c1: '#500724', c2: '#3b0764' },
+                                { name: 'Gold', c1: '#422006', c2: '#1c1917' },
+                            ].map((preset) => (
+                                <button
+                                    key={preset.name}
+                                    title={preset.name}
+                                    onClick={() => setConfig((prev) => ({ ...prev, backgroundColor: preset.c1, backgroundColor2: preset.c2 }))}
+                                    style={{
+                                        width: '32px',
+                                        height: '32px',
+                                        borderRadius: '50%',
+                                        border: config.backgroundColor === preset.c1 && config.backgroundColor2 === preset.c2
+                                            ? '2px solid var(--accent-primary)'
+                                            : '2px solid rgba(255,255,255,0.1)',
+                                        background: `linear-gradient(145deg, ${preset.c1}, ${preset.c2})`,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        flexShrink: 0,
+                                        padding: 0,
+                                        boxShadow: config.backgroundColor === preset.c1 && config.backgroundColor2 === preset.c2
+                                            ? '0 0 8px rgba(59,130,246,0.4)'
+                                            : 'none',
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="control-group">
+                        <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Background Pattern</span>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                            {[
+                                { key: 'none', label: 'None', css: {} },
+                                { key: 'dots', label: 'Dots', css: { backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '6px 6px' } },
+                                { key: 'grid', label: 'Grid', css: { backgroundImage: 'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '7px 7px' } },
+                                { key: 'diagonal-stripes', label: 'Stripes', css: { backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(255,255,255,0.15) 3px, rgba(255,255,255,0.15) 4px)' } },
+                                { key: 'honeycomb', label: 'Honey', css: { backgroundImage: 'radial-gradient(circle farthest-side at 0% 50%, transparent 23%, rgba(255,255,255,0.15) 25%, rgba(255,255,255,0.15) 27%, transparent 29%), radial-gradient(circle farthest-side at 0% 50%, transparent 23%, rgba(255,255,255,0.15) 25%, rgba(255,255,255,0.15) 27%, transparent 29%)', backgroundSize: '10px 17px', backgroundPosition: '0 0, 5px 8.5px' } },
+                                { key: 'chevron', label: 'Chevron', css: { backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.15) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,0.15) 25%, transparent 25%)', backgroundSize: '7px 7px', backgroundPosition: '0 0, 3.5px 0' } },
+                                { key: 'circles', label: 'Rings', css: { backgroundImage: 'radial-gradient(circle, transparent 40%, rgba(255,255,255,0.12) 42%, rgba(255,255,255,0.12) 48%, transparent 50%)', backgroundSize: '12px 12px' } },
+                                { key: 'crosshatch', label: 'Cross', css: { backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(255,255,255,0.1) 3px, rgba(255,255,255,0.1) 4px), repeating-linear-gradient(-45deg, transparent, transparent 3px, rgba(255,255,255,0.1) 3px, rgba(255,255,255,0.1) 4px)' } },
+                                { key: 'diamonds', label: 'Diamond', css: { backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%)', backgroundSize: '9px 9px' } },
+                            ].map((p) => (
+                                <button
+                                    key={p.key}
+                                    title={p.label}
+                                    onClick={() => setConfig((prev) => ({ ...prev, backgroundPattern: p.key }))}
+                                    style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '6px',
+                                        border: config.backgroundPattern === p.key
+                                            ? '2px solid var(--accent-primary)'
+                                            : '2px solid rgba(255,255,255,0.1)',
+                                        background: '#1a1a2e',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        flexShrink: 0,
+                                        padding: 0,
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                        boxShadow: config.backgroundPattern === p.key
+                                            ? '0 0 8px rgba(59,130,246,0.4)'
+                                            : 'none',
+                                        ...p.css,
+                                        fontSize: p.key === 'none' ? '9px' : '0',
+                                        color: 'var(--text-tertiary)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontWeight: 600,
+                                        letterSpacing: '0.02em',
+                                    }}
+                                >
+                                    {p.key === 'none' ? '✕' : ''}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="control-group">
+                        <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>Custom Colors</span>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <input
                                 type="color"
@@ -332,7 +425,7 @@ export default function Sidebar({ config, setConfig, elements, setElements }) {
                             <option value="iphone-65">iPhone (6.5" / 6.7")</option>
                             <option value="iphone-55">iPhone (5.5" Classic)</option>
                             <option value="ipad-pro">iPad Pro (12.9")</option>
-                            <option value="galaxy-a15">Samsung Galaxy A15 5G</option>
+                            <option value="galaxy-a17">Samsung Galaxy A17 5G</option>
                         </select>
                     </div>
                 </div>

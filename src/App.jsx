@@ -9,7 +9,8 @@ function App() {
     backgroundColor2: '#3b0764',
     appImage: '',
     fontFamily: "'Inter', sans-serif",
-    deviceType: 'iphone-65'
+    deviceType: 'iphone-65',
+    backgroundPattern: 'none'
   });
 
   const [elements, setElements] = useState([

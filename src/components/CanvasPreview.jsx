@@ -12,6 +12,42 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
         background: `linear-gradient(145deg, ${config.backgroundColor || '#0a0a0a'} 0%, ${config.backgroundColor2 || '#1a1a1a'} 100%)`
     };
 
+    const patternStyles = {
+        none: {},
+        dots: {
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1.5px, transparent 1.5px)',
+            backgroundSize: '20px 20px'
+        },
+        grid: {
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
+            backgroundSize: '24px 24px'
+        },
+        'diagonal-stripes': {
+            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.04) 10px, rgba(255,255,255,0.04) 12px)',
+        },
+        honeycomb: {
+            backgroundImage: `radial-gradient(circle farthest-side at 0% 50%, transparent 23%, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.04) 27%, transparent 29%), radial-gradient(circle farthest-side at 0% 50%, transparent 23%, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.04) 27%, transparent 29%)`,
+            backgroundSize: '30px 52px',
+            backgroundPosition: '0 0, 15px 26px'
+        },
+        chevron: {
+            backgroundImage: `linear-gradient(135deg, rgba(255,255,255,0.04) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,0.04) 25%, transparent 25%)`,
+            backgroundSize: '20px 20px',
+            backgroundPosition: '0 0, 10px 0'
+        },
+        circles: {
+            backgroundImage: 'radial-gradient(circle, transparent 45%, rgba(255,255,255,0.04) 46%, rgba(255,255,255,0.04) 50%, transparent 51%)',
+            backgroundSize: '36px 36px'
+        },
+        crosshatch: {
+            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.03) 8px, rgba(255,255,255,0.03) 9px), repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(255,255,255,0.03) 8px, rgba(255,255,255,0.03) 9px)',
+        },
+        diamonds: {
+            backgroundImage: `linear-gradient(45deg, rgba(255,255,255,0.04) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.04) 75%, transparent 75%)`,
+            backgroundSize: '28px 28px'
+        }
+    };
+
     const deviceSpecs = {
         'iphone-65': {
             canvasW: 428,
@@ -46,13 +82,13 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
             classic: false,
             android: false
         },
-        'galaxy-a15': {
+        'galaxy-a17': {
             canvasW: 360,
-            canvasH: 640,
-            aspect: '1080 / 1920',
-            radiusCenter: '36px',
-            radiusEdge: '36px 36px 0 0',
-            border: '10px',
+            canvasH: 780,
+            aspect: '1080 / 2340',
+            radiusCenter: '20px',
+            radiusEdge: '20px 20px 0 0',
+            border: '8px',
             island: false,
             classic: false,
             android: true,
@@ -84,10 +120,10 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
             } else if (config.deviceType === 'iphone-55') {
                 targetWidth = 1242;
                 targetHeight = 2208;
-            } else if (config.deviceType === 'galaxy-a15') {
-                // Google Play Store recommended phone screenshot size (16:9, compliant with 2:1 max ratio)
+            } else if (config.deviceType === 'galaxy-a17') {
+                // Google Play Store: export at native Galaxy A15 resolution
                 targetWidth = 1080;
-                targetHeight = 1920;
+                targetHeight = 2340;
             }
 
             // Force scaling factor using mathematical integers rather than DOM dimensions
@@ -139,6 +175,16 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
                         flexShrink: 0
                     }}
                 >
+                    {/* Pattern Overlay */}
+                    {config.backgroundPattern && config.backgroundPattern !== 'none' && (
+                        <div style={{
+                            position: 'absolute',
+                            top: 0, left: 0, right: 0, bottom: 0,
+                            ...patternStyles[config.backgroundPattern],
+                            zIndex: 1,
+                            pointerEvents: 'none'
+                        }} />
+                    )}
                     {/* Snap Guide Lines */}
                     {guideLines.v && (
                         <div style={{
@@ -287,7 +333,7 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
                                         enableResizing={true}
                                         style={{ display: 'flex' }}
                                     >
-                                        <img src={config.appImage} alt="App Content" className="app-screen-image" style={{ width: '100%', height: '100%', objectFit: 'fill', borderRadius: '0', pointerEvents: 'none' }} />
+                                        <img src={config.appImage} alt="App Content" className="app-screen-image" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '0', pointerEvents: 'none' }} />
                                     </Rnd>
                                 </div>
                             ) : (
