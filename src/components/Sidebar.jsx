@@ -332,6 +332,7 @@ export default function Sidebar({ config, setConfig, elements, setElements }) {
                             <option value="iphone-65">iPhone (6.5" / 6.7")</option>
                             <option value="iphone-55">iPhone (5.5" Classic)</option>
                             <option value="ipad-pro">iPad Pro (12.9")</option>
+                            <option value="galaxy-a15">Samsung Galaxy A15 5G</option>
                         </select>
                     </div>
                 </div>

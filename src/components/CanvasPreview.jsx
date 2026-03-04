@@ -21,7 +21,8 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
             radiusEdge: '44px 44px 0 0',
             border: '14px',
             island: true,
-            classic: false
+            classic: false,
+            android: false
         },
         'iphone-55': {
             canvasW: 414,
@@ -31,7 +32,8 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
             radiusEdge: '40px 40px 0 0',
             border: '12px',
             island: false,
-            classic: true
+            classic: true,
+            android: false
         },
         'ipad-pro': {
             canvasW: 512,
@@ -41,7 +43,20 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
             radiusEdge: '18px 18px 0 0',
             border: '12px',
             island: false,
-            classic: false
+            classic: false,
+            android: false
+        },
+        'galaxy-a15': {
+            canvasW: 360,
+            canvasH: 780,
+            aspect: '1080 / 2340',
+            radiusCenter: '36px',
+            radiusEdge: '36px 36px 0 0',
+            border: '10px',
+            island: false,
+            classic: false,
+            android: true,
+            punchHole: true
         }
     };
 
@@ -69,6 +84,10 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
             } else if (config.deviceType === 'iphone-55') {
                 targetWidth = 1242;
                 targetHeight = 2208;
+            } else if (config.deviceType === 'galaxy-a15') {
+                // Google Play Store recommended phone screenshot size
+                targetWidth = 1080;
+                targetHeight = 2340;
             }
 
             // Force scaling factor using mathematical integers rather than DOM dimensions
@@ -247,6 +266,7 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
                         }}>
                             {activeSpec.island && <div className="dynamic-island"></div>}
                             {activeSpec.classic && <div className="classic-bezel-top"></div>}
+                            {activeSpec.punchHole && <div className="punch-hole-camera"></div>}
                             {config.deviceType === 'ipad-pro' && (
                                 <div style={{
                                     position: 'absolute', top: config.layout === 'text-bottom' ? 'auto' : '-11px', bottom: config.layout === 'text-bottom' ? '-11px' : 'auto', left: '50%', transform: 'translateX(-50%)',
