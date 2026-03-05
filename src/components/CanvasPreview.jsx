@@ -93,6 +93,30 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
             classic: false,
             android: true,
             punchHole: true
+        },
+        'tablet-7': {
+            canvasW: 384,
+            canvasH: 683,
+            aspect: '1080 / 1920',
+            radiusCenter: '16px',
+            radiusEdge: '16px 16px 0 0',
+            border: '10px',
+            island: false,
+            classic: false,
+            android: true,
+            punchHole: true
+        },
+        'tablet-10': {
+            canvasW: 450,
+            canvasH: 800,
+            aspect: '1200 / 2133',
+            radiusCenter: '16px',
+            radiusEdge: '16px 16px 0 0',
+            border: '10px',
+            island: false,
+            classic: false,
+            android: true,
+            punchHole: true
         }
     };
 
@@ -124,6 +148,14 @@ export default function CanvasPreview({ config, setConfig, elements, setElements
                 // Google Play Store: export at native Galaxy A15 resolution
                 targetWidth = 1080;
                 targetHeight = 2340;
+            } else if (config.deviceType === 'tablet-7') {
+                // Google Play Store: 7" tablet (9:16, sides 320-3840px)
+                targetWidth = 1080;
+                targetHeight = 1920;
+            } else if (config.deviceType === 'tablet-10') {
+                // Google Play Store: 10" tablet (9:16, sides 1080-7680px)
+                targetWidth = 1200;
+                targetHeight = 2133;
             }
 
             // Force scaling factor using mathematical integers rather than DOM dimensions
